@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">FoodDeliveryApp</string>
+    <string name="splash_description">Craving something tasty? We bring your favorite dishes faster than you can set the table.
+Good vibes, great food, right on time.</string>
+
+    <string name="sample_text">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</string>
+    <string name="button_text">Lorem ipsum</string>
+</resources>
