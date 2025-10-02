@@ -1,48 +1,67 @@
 package com.example.fooddeliveryapp.presentation.state
 
-import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.fooddeliveryapp.data.local.model.CartItem
 import com.example.fooddeliveryapp.data.local.model.PopularItem
+import com.example.fooddeliveryapp.data.repository.CartRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class CartViewModel : ViewModel() {
-    private val _cartItems = mutableStateListOf<CartItem>()
-    val cartItems: List<CartItem> = _cartItems
+@HiltViewModel
+class CartViewModel @Inject constructor(
+    private val cartRepository: CartRepository
+) : ViewModel() {
+    private val _cartItems = cartRepository.getAllCartItems()
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.Eagerly,
+            initialValue = emptyList()
+        )
+    val cartItems: StateFlow<List<CartItem>> = _cartItems
 
-    val totalPrice: Double
-        get() = _cartItems.sumOf { it.totalPrice }
+    private val _totalPrice = cartRepository.getTotalPrice()
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.Eagerly,
+            initialValue = 0.0
+        )
+    val totalPrice: StateFlow<Double> = _totalPrice
+    private val _itemCount = cartRepository.getItemCount()
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.Eagerly,
+            initialValue = 0
+        )
+    val itemCount: StateFlow<Int> = _itemCount
 
-    val itemCount: Int
-        get() = _cartItems.sumOf { it.quantity }
-
-    fun addToCart(item: PopularItem, quantity: Int) {
-        val existingCartItem = _cartItems.find { it.popularItem.id == item.id }
-
-        if (existingCartItem != null) {
-            val newQuantity = existingCartItem.quantity + quantity
-            val index = _cartItems.indexOf(existingCartItem)
-            _cartItems[index] = existingCartItem.copy(quantity = newQuantity)
-        } else {
-            _cartItems.add(CartItem(item, quantity))
+    fun addToCart(item: PopularItem, quantity: Int = 1) {
+        viewModelScope.launch {
+            cartRepository.addToCart(item, quantity)
         }
     }
-
     fun removeFromCart(cartItem: CartItem) {
-        _cartItems.remove(cartItem)
+        viewModelScope.launch {
+            cartRepository.removeFromCart(cartItem)
+        }
     }
-
     fun updateQuantity(cartItem: CartItem, newQuantity: Int) {
-        if (newQuantity <= 0) {
-            removeFromCart(cartItem)
-        } else {
-            val index = _cartItems.indexOf(cartItem)
-            if (index != -1) {
-                _cartItems[index] = cartItem.copy(quantity = newQuantity)
-            }
+        viewModelScope.launch {
+            cartRepository.updateQuantity(cartItem, newQuantity)
         }
     }
 
     fun clearCart() {
-        _cartItems.clear()
+        viewModelScope.launch {
+            cartRepository.clearCart()
+        }
+    }
+
+    suspend fun isItemInCart(itemId: String): Boolean {
+        return cartRepository.isItemInCart(itemId)
     }
 }

@@ -27,6 +27,12 @@ sealed class HomeRoutes {
     data object ProfileRoute : HomeRoutes()
 
     @Serializable
+    data object SettingsRoute : HomeRoutes()
+
+    @Serializable
+    data object FilterScreen: HomeRoutes()
+
+    @Serializable
     data object MapRoute : HomeRoutes()
 
     @Serializable

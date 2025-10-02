@@ -3,8 +3,11 @@ package com.example.fooddeliveryapp.presentation.feature.dashboard.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.fooddeliveryapp.data.local.model.PopularItem
+import com.example.fooddeliveryapp.data.mapper.CategoryMapper
 import com.example.fooddeliveryapp.domain.repository.MealRepository
 import com.example.fooddeliveryapp.presentation.feature.dashboard.intent.HomeIntent
+import com.example.fooddeliveryapp.presentation.feature.dashboard.model.FilterType
+import com.example.fooddeliveryapp.presentation.feature.dashboard.model.PriceRange
 import com.example.fooddeliveryapp.presentation.feature.dashboard.state.HomeState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -31,6 +34,7 @@ class HomeViewModel @Inject constructor(
             is HomeIntent.RefreshItems -> refreshItems()
             is HomeIntent.SearchMeals -> searchMeals(intent.query)
             is HomeIntent.FilterByCategory -> filterByCategory(intent.category)
+            is HomeIntent.ApplyFilter -> applyFilter(intent.filter)
         }
     }
 
@@ -120,8 +124,9 @@ class HomeViewModel @Inject constructor(
     private fun filterByCategory(category: String) {
         viewModelScope.launch {
             _state.value = _state.value.copy(isLoading = true, error = null)
+            val apiCategory = CategoryMapper.mapUIToAPICategory(category)
 
-            mealRepository.getMealsByCategory(category).fold(
+            mealRepository.getMealsByCategory(apiCategory).fold(
                 onSuccess = { meals ->
                     _state.value = _state.value.copy(
                         isLoading = false,
@@ -137,5 +142,26 @@ class HomeViewModel @Inject constructor(
                 }
             )
         }
+    }
+
+    private fun applyFilter(filter: FilterType) {
+        val allItems = PopularItem.getPopularItems()
+
+        val filtered = when (filter) {
+            is FilterType.All -> allItems
+            is FilterType.Rating -> allItems.filter { it.rating >= filter.minRating }
+            is FilterType.Price -> when (filter.range) {
+                PriceRange.Under10 -> allItems.filter { it.price < 10 }
+                PriceRange.TenToFifteen -> allItems.filter { it.price in 10.0..15.0 }
+                PriceRange.Above15 -> allItems.filter { it.price > 15 }
+            }
+            is FilterType.Diet -> allItems.filter { it.isVegetarian == filter.isVeg }
+            is FilterType.Hotel -> allItems.filter { it.hotelName == filter.hotelName }
+        }
+
+        _state.value = _state.value.copy(
+            popularItems = filtered,
+            selectedFilter = filter
+        )
     }
 }

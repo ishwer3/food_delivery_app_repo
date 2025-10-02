@@ -7,31 +7,29 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -41,11 +39,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.fooddeliveryapp.presentation.common.component.TopCurvedView
+import com.example.fooddeliveryapp.ui.spacer.HorizontalSpacer
+import com.example.fooddeliveryapp.ui.spacer.VerticalSpacer
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -83,41 +83,204 @@ fun AddressScreen(
             .imePadding()
     ) {
         // Header with orange background
-        TopCurvedView {
-            Column {
-
-            }
-        }
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(Color(0xFFFF9800))
-                .statusBarsPadding()
-                .padding(16.dp)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                IconButton(
-                    onClick = onBackClick,
-                    modifier = Modifier.size(40.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.ArrowBack,
-                        contentDescription = "Back",
-                        tint = Color.White
-                    )
-                }
-
-                Text(
-                    text = "Enter your address",
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White,
-                    modifier = Modifier.padding(start = 8.dp)
+        TopCurvedView{
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+            )
+            {
+                VerticalSpacer(10.dp)
+                Icon(
+                    imageVector = Icons.Default.Close,
+                    contentDescription = "Close",
+                    tint = Color.White,
+                    modifier = Modifier
+                        .size(32.dp)
+                        .clickable { onBackClick() }
                 )
+
+                VerticalSpacer(16.dp)
+
+                Row(
+                    modifier = Modifier.fillMaxWidth().height(90.dp).padding(horizontal = 10.dp)
+                ) {
+                    // Left side - Dots with connecting line
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.fillMaxHeight().padding(end = 12.dp)
+                    ) {
+                        // First dot
+                        Box(
+                            modifier = Modifier
+                                .size(16.dp)
+                                .background(
+                                    color = Color.White,
+                                    shape = CircleShape
+                                )
+                        )
+
+                        VerticalSpacer(5.dp)
+
+                        repeat(5) {
+                            Spacer(modifier = Modifier.height(3.dp))
+                            Box(
+                                modifier = Modifier
+                                    .width(2.dp)
+                                    .height(6.dp)
+                                    .background(Color.White.copy(alpha = 0.6f))
+                            )
+                        }
+
+                        VerticalSpacer(5.dp)
+
+                        // Second dot
+                        Box(
+                            modifier = Modifier
+                                .size(16.dp)
+                                .background(
+                                    color = Color.White,
+                                    shape = CircleShape
+                                )
+                        )
+                    }
+
+                    // Right side - Location fields with divider
+                    Column(
+                        modifier = Modifier.weight(1f).fillMaxHeight(),
+                        verticalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        // First location field
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.LocationOn,
+                                contentDescription = "Location",
+                                tint = Color.White,
+                                modifier = Modifier.size(20.dp)
+                            )
+
+                            HorizontalSpacer(8.dp)
+
+                            BasicTextField(
+                                value = "",
+                                onValueChange = {},
+                                modifier = Modifier.weight(1f),
+                                textStyle = TextStyle(
+                                    color = Color.White,
+                                    fontSize = 16.sp
+                                ),
+                                decorationBox = { innerTextField ->
+                                    if (true) {
+                                        Text(
+                                            text = "Lorem ipsum dolor sit",
+                                            color = Color.White,
+                                            fontSize = 16.sp
+                                        )
+                                    }
+                                    innerTextField()
+                                }
+                            )
+                        }
+
+                        // Horizontal divider
+                        HorizontalDivider(color = Color.White, thickness = 1.dp)
+
+                        // Second location field
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.LocationOn,
+                                contentDescription = "Location",
+                                tint = Color.White,
+                                modifier = Modifier.size(20.dp)
+                            )
+
+                            HorizontalSpacer(8.dp)
+                            BasicTextField(
+                                value = "",
+                                onValueChange = {},
+                                modifier = Modifier.weight(1f),
+                                textStyle = TextStyle(
+                                    color = Color.White,
+                                    fontSize = 16.sp
+                                ),
+                                decorationBox = { innerTextField ->
+                                    if (true) {
+                                        Text(
+                                            text = "Lorem ipsum dolor sit",
+                                            color = Color.White,
+                                            fontSize = 16.sp
+                                        )
+                                    }
+                                    innerTextField()
+                                }
+                            )
+                        }
+                    }
+                }
             }
+
+            /*Column(
+                modifier = Modifier.fillMaxWidth().padding(10.dp),
+            )
+            {
+                Icon(
+                    imageVector = Icons.Default.Close,
+                    contentDescription = "Close",
+                    tint = Color.White,
+                    modifier = Modifier.size(40.dp).clickable{ onBackClick() }
+                )
+                Row {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(20.dp)
+                                .background(
+                                    color = Color.White,
+                                    shape = CircleShape
+                                )
+                        )
+
+                        repeat(6) {
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Box(
+                                modifier = Modifier
+                                    .width(2.dp)
+                                    .height(6.dp)
+                                    .background(Color.White.copy(alpha = 0.5f))
+                            )
+                        }
+
+                        Box(
+                            modifier = Modifier
+                                .size(20.dp)
+                                .background(
+                                    color = Color.White,
+                                    shape = CircleShape
+                                )
+                        )
+                    }
+
+                    Column(
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        // transparent field
+
+                        HorizontalDivider(color = Color.White)
+
+                        // transparent field
+                    }
+                }
+            }*/
         }
 
         // Content area
@@ -127,50 +290,6 @@ fun AddressScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Address input field
-            OutlinedTextField(
-                value = searchText,
-                onValueChange = { searchText = it },
-                modifier = Modifier.fillMaxWidth(),
-                placeholder = {
-                    Text(
-                        text = "Search for your address...",
-                        color = Color.Gray
-                    )
-                },
-                leadingIcon = {
-                    Icon(
-                        imageVector = Icons.Default.LocationOn,
-                        contentDescription = "Location",
-                        tint = Color(0xFFFF9800)
-                    )
-                },
-                trailingIcon = {
-                    Icon(
-                        imageVector = Icons.Default.Search,
-                        contentDescription = "Search",
-                        tint = Color.Gray
-                    )
-                },
-                shape = RoundedCornerShape(12.dp),
-                colors = TextFieldDefaults.colors(
-                    focusedIndicatorColor = Color(0xFFFF9800),
-                    unfocusedIndicatorColor = Color.LightGray,
-                    focusedTextColor = Color.Black,
-                    unfocusedTextColor = Color.Black,
-                    cursorColor = Color(0xFFFF9800)
-                ),
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Text,
-                    imeAction = ImeAction.Search
-                ),
-                keyboardActions = KeyboardActions(
-                    onSearch = {
-                        keyboardController?.hide()
-                    }
-                ),
-                singleLine = true
-            )
 
             // Address suggestions
             if (filteredSuggestions.isNotEmpty()) {
@@ -250,5 +369,54 @@ fun AddressSuggestionCard(
                 modifier = Modifier.weight(1f)
             )
         }
+    }
+}
+
+@Composable
+fun CommonRow(){
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center
+    ) {
+        Box(
+            modifier = Modifier
+                .size(16.dp)
+                .background(
+                    color = Color.White,
+                    shape = CircleShape
+                )
+        )
+
+        HorizontalSpacer(20.dp)
+
+        Icon(
+            imageVector = Icons.Default.LocationOn,
+            contentDescription = "Location",
+            tint = Color.White,
+            modifier = Modifier.size(20.dp)
+        )
+
+        Spacer(modifier = Modifier.width(8.dp))
+
+        BasicTextField(
+            value = "",
+            onValueChange = {},
+            modifier = Modifier.weight(1f),
+            textStyle = TextStyle(
+                color = Color.White,
+                fontSize = 14.sp
+            ),
+            decorationBox = { innerTextField ->
+                if (true) {
+                    Text(
+                        text = "Lorem ipsum dolor sit",
+                        color = Color.White,
+                        fontSize = 14.sp
+                    )
+                }
+                innerTextField()
+            }
+        )
     }
 }

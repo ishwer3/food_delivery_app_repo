@@ -33,8 +33,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -50,10 +49,10 @@ fun CartScreen(
     onBuyNowClick: () -> Unit = {},
     onEnterAddressClick: () -> Unit = {}
 ) {
-    // Observe cart state changes
-    val cartItems by remember { derivedStateOf { cartViewModel.cartItems } }
-    val totalPrice by remember { derivedStateOf { cartViewModel.totalPrice } }
-    val itemCount by remember { derivedStateOf { cartViewModel.itemCount } }
+    // Observe cart state changes from StateFlow
+    val cartItems by cartViewModel.cartItems.collectAsState()
+    val totalPrice by cartViewModel.totalPrice.collectAsState()
+    val itemCount by cartViewModel.itemCount.collectAsState()
 
     Column(
         modifier = Modifier

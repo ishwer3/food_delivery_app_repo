@@ -14,13 +14,13 @@ data class CategoryModel(
                 CategoryModel(
                     id = "1",
                     icon = R.drawable.bevarages_icon,
-                    title = "Drinks",
+                    title = "Dessert",
                     description = "Fresh juices and beverages"
                 ),
                 CategoryModel(
                     id = "2",
                     icon = R.drawable.coffee_icon, // ☕ Coffee / Tea
-                    title = "Coffee",
+                    title = "Breakfast",
                     description = "Hot coffee and tea selections"
                 ),
                 CategoryModel(
@@ -40,12 +40,6 @@ data class CategoryModel(
                     icon = R.drawable.salad_icon, // 🥗 Salad
                     title = "Salads",
                     description = "Healthy fresh salads"
-                ),
-                CategoryModel(
-                    id = "6",
-                    icon = R.drawable.icecream_icon, // 🍨 Ice cream / Dessert
-                    title = "Desserts",
-                    description = "Cakes and ice creams"
                 ),
                 CategoryModel(
                     id = "7",

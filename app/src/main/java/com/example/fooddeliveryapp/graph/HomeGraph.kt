@@ -5,6 +5,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import com.example.fooddeliveryapp.presentation.feature.dashboard.view.CategoryScreen
 import com.example.fooddeliveryapp.presentation.feature.dashboard.view.DashboardScreen
+import com.example.fooddeliveryapp.presentation.feature.dashboard.view.FilterScreen
 import com.example.fooddeliveryapp.presentation.feature.dashboard.view.PaymentCardScreen
 import com.example.fooddeliveryapp.presentation.feature.dashboard.view.settings.MapScreen
 import com.example.fooddeliveryapp.presentation.feature.delivery.view.DeliveryTrackingScreen
@@ -23,7 +24,8 @@ fun NavGraphBuilder.homeNavGraph(navController: NavController){
                 navController.navigate(HomeRoutes.PaymentRoute)
             },
             onNavigateToCategory = {
-                navController.navigate(HomeRoutes.SeeAllCategoriesRoute)
+//                navController.navigate(HomeRoutes.SeeAllCategoriesRoute)
+                navController.navigate(HomeRoutes.FilterScreen)
             }
         )
     }
@@ -54,5 +56,9 @@ fun NavGraphBuilder.homeNavGraph(navController: NavController){
                 // You can implement intent to dial the phone number
             }
         )
+    }
+
+    composable<HomeRoutes.FilterScreen> {
+        FilterScreen()
     }
 }

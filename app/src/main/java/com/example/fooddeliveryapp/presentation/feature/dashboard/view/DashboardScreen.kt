@@ -2,27 +2,24 @@ package com.example.fooddeliveryapp.presentation.feature.dashboard.view
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.fooddeliveryapp.presentation.common.component.BadgedNavigationItem
-import com.example.fooddeliveryapp.presentation.feature.dashboard.view.cart.view.CartScreen
 import com.example.fooddeliveryapp.presentation.feature.dashboard.navigation.bottomNavItems
+import com.example.fooddeliveryapp.presentation.feature.dashboard.view.cart.view.CartScreen
 import com.example.fooddeliveryapp.presentation.feature.dashboard.view.settings.MapScreen
 import com.example.fooddeliveryapp.presentation.feature.dashboard.view.settings.SettingsScreen
 import com.example.fooddeliveryapp.presentation.state.CartViewModel
@@ -35,11 +32,14 @@ fun DashboardScreen(
     onNavigateToCategory: () -> Unit = {},
     onBuyNowClick: () -> Unit = {}
 ) {
-    var selectedItemIndex by remember { mutableIntStateOf(0) }
-    val cartViewModel: CartViewModel = viewModel()
+    val cartViewModel: CartViewModel = hiltViewModel()
 
-    // State to show/hide track order UI (simulate active order)
-    var hasActiveOrder by remember { mutableStateOf(true) } // Set to true to show the track order UI
+    // Collect cart item count from StateFlow
+    val cartItemCount by cartViewModel.itemCount.collectAsState()
+
+    // Observe current navigation destination to sync bottom nav
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
 
     Box(modifier = Modifier.fillMaxSize()) {
         Scaffold(
@@ -47,11 +47,13 @@ fun DashboardScreen(
             bottomBar = {
                 NavigationBar {
                     bottomNavItems.forEachIndexed { index, item ->
+                        // Check if current route matches this bottom nav item
+                        val isSelected = currentRoute == item.route
+
                         if (item.route == "cart") {
                             BadgedNavigationItem(
-                                selected = selectedItemIndex == index,
+                                selected = isSelected,
                                 onClick = {
-                                    selectedItemIndex = index
                                     navController.navigate(item.route) {
                                         popUpTo(navController.graph.startDestinationId) {
                                             saveState = true
@@ -60,17 +62,16 @@ fun DashboardScreen(
                                         restoreState = true
                                     }
                                 },
-                                icon = if (index == selectedItemIndex) {
+                                icon = if (isSelected) {
                                     item.selectedIcon
                                 } else item.unselectedIcon,
                                 label = item.title,
-                                badgeCount = cartViewModel.itemCount
+                                badgeCount = cartItemCount
                             )
                         } else {
                             NavigationBarItem(
-                                selected = selectedItemIndex == index,
+                                selected = isSelected,
                                 onClick = {
-                                    selectedItemIndex = index
                                     navController.navigate(item.route) {
                                         popUpTo(navController.graph.startDestinationId) {
                                             saveState = true
@@ -84,7 +85,7 @@ fun DashboardScreen(
                                 },
                                 icon = {
                                     Icon(
-                                        imageVector = if (index == selectedItemIndex) {
+                                        imageVector = if (isSelected) {
                                             item.selectedIcon
                                         } else item.unselectedIcon,
                                         contentDescription = item.title
@@ -99,24 +100,22 @@ fun DashboardScreen(
             NavHost(
                 navController = navController,
                 startDestination = bottomNavItems[0].route,
-                modifier = Modifier.fillMaxSize().padding(innerPadding)
+                modifier = Modifier.fillMaxSize()
             ) {
                 composable("home") {
                     HomeScreen(
                         cartViewModel = cartViewModel,
-//                        onSeeAllClick = onNavigateToCategory
-                        onSeeAllClick = {
-                            navController.navigate(HomeRoutes.AddressRoute)
-                        }
+                        onSeeAllClick = onNavigateToCategory
                     )
                 }
-                composable("cart") {
+                composable<HomeRoutes.CartRoute> {
                     CartScreen(
                         cartViewModel = cartViewModel,
                         onBuyNowClick = {
                             onBuyNowClick()
                         },
                         onEnterAddressClick = {
+                            navController.navigate(HomeRoutes.AddressRoute)
                             // Handle enter address - navigate to address screen
                         }
                     )
@@ -131,25 +130,28 @@ fun DashboardScreen(
                     )
                 }*/
 
-                composable("profile") {
+                composable<HomeRoutes.ProfileRoute> {
                     ProfileScreen(onNavigateToAuth = onNavigateToAuth)
                 }
-                composable("settings") {
+                composable<HomeRoutes.SettingsRoute> {
                     SettingsScreen(onItemClick = {
                         navController.navigate(HomeRoutes.MapRoute)
                     })
                 }
                 composable("user") {
                     UserScreen()
+//                    FilterScreen()
                 }
                 composable<HomeRoutes.MapRoute> {
                     MapScreen()
                 }
 
                 composable<HomeRoutes.AddressRoute> {
-                    AddressScreen {
-
-                    }
+                    AddressScreen(
+                        onBackClick = {
+                            navController.popBackStack()
+                        }
+                    )
                 }
             }
         }
