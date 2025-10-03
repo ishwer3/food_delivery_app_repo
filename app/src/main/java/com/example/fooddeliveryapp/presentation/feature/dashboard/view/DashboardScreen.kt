@@ -50,6 +50,7 @@ fun DashboardScreen(
                         // Check if current route matches this bottom nav item
                         // For type-safe routes, the route string contains the full class name
                         val isSelected = when (item.route) {
+                            "search" -> currentRoute == "search"
                             "cart" -> currentRoute?.contains(HomeRoutes.CartRoute::class.simpleName ?: "") == true
                             "profile" -> currentRoute?.contains(HomeRoutes.ProfileRoute::class.simpleName ?: "") == true
                             "map" -> currentRoute?.contains(HomeRoutes.MapRoute::class.simpleName ?: "") == true
@@ -121,6 +122,9 @@ fun DashboardScreen(
                         cartViewModel = cartViewModel,
                         onSeeAllClick = onNavigateToCategory
                     )
+                }
+                composable("search") {
+                    SearchScreen()
                 }
                 composable<HomeRoutes.CartRoute> {
                     CartScreen(

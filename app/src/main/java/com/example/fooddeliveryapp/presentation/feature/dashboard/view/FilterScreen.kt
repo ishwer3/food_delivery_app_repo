@@ -33,7 +33,7 @@ import com.example.fooddeliveryapp.presentation.feature.dashboard.viewmodel.Filt
 import com.example.fooddeliveryapp.ui.spacer.VerticalSpacer
 
 @Composable
-fun FilterScreen(
+fun SearchScreen(
     filterViewModel: FilterViewModel = viewModel()
 ) {
     val state by filterViewModel.state.collectAsState()
@@ -46,7 +46,7 @@ fun FilterScreen(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "Filters",
+                    text = "Search & Filter",
                     color = Color.White,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(16.dp)
