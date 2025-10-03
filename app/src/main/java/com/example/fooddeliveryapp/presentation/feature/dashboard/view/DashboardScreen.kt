@@ -48,13 +48,20 @@ fun DashboardScreen(
                 NavigationBar {
                     bottomNavItems.forEachIndexed { index, item ->
                         // Check if current route matches this bottom nav item
-                        val isSelected = currentRoute == item.route
+                        // For type-safe routes, the route string contains the full class name
+                        val isSelected = when (item.route) {
+                            "cart" -> currentRoute?.contains(HomeRoutes.CartRoute::class.simpleName ?: "") == true
+                            "profile" -> currentRoute?.contains(HomeRoutes.ProfileRoute::class.simpleName ?: "") == true
+                            "map" -> currentRoute?.contains(HomeRoutes.MapRoute::class.simpleName ?: "") == true
+                            "settings" -> currentRoute?.contains(HomeRoutes.SettingsRoute::class.simpleName ?: "") == true
+                            else -> currentRoute == item.route
+                        }
 
                         if (item.route == "cart") {
                             BadgedNavigationItem(
                                 selected = isSelected,
                                 onClick = {
-                                    navController.navigate(item.route) {
+                                    navController.navigate(HomeRoutes.CartRoute) {
                                         popUpTo(navController.graph.startDestinationId) {
                                             saveState = true
                                         }
@@ -72,7 +79,14 @@ fun DashboardScreen(
                             NavigationBarItem(
                                 selected = isSelected,
                                 onClick = {
-                                    navController.navigate(item.route) {
+                                    val destination = when (item.route) {
+                                        "home" -> "home"
+                                        "profile" -> HomeRoutes.ProfileRoute
+                                        "map" -> HomeRoutes.MapRoute
+                                        "settings" -> HomeRoutes.SettingsRoute
+                                        else -> item.route
+                                    }
+                                    navController.navigate(destination) {
                                         popUpTo(navController.graph.startDestinationId) {
                                             saveState = true
                                         }

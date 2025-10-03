@@ -6,10 +6,10 @@ import kotlin.random.Random
 
 fun MealDto.toPopularItem(): PopularItem {
     val description = strInstructions?.take(100) ?: "Delicious meal prepared with fresh ingredients"
-    val price = Random.nextDouble(15.0, 50.0)
+    val price = String.format("%.2f", Random.nextDouble(15.0, 50.0)).toDouble()
     val hotelName = "${strArea ?: "International"} Kitchen"
     val distance = String.format("%.1f km", Random.nextDouble(0.5, 5.0))
-    val rating = Random.nextFloat() * 1.5f + 3.5f // Rating between 3.5 and 5.0
+    val rating = String.format("%.1f", Random.nextFloat() * 1.5f + 3.5f).toFloat() // Rating between 3.5 and 5.0
     val isVegetarian = strCategory?.lowercase()?.contains("vegetarian") == true ||
                       strCategory?.lowercase()?.contains("vegan") == true
 

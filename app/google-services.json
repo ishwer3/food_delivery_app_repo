@@ -1,45 +1,46 @@
 {
   "project_info": {
-    "project_number": "888905637057",
-    "firebase_url": "https://fir-demo-6370e.firebaseio.com",
-    "project_id": "fir-demo-6370e",
-    "storage_bucket": "fir-demo-6370e.firebasestorage.app"
+    "project_number": "482805813880",
+    "firebase_url": "https://fir-authapp-ad208-default-rtdb.firebaseio.com",
+    "project_id": "fir-authapp-ad208",
+    "storage_bucket": "fir-authapp-ad208.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:888905637057:android:30947c35ab020c682ec840",
+        "mobilesdk_app_id": "1:482805813880:android:658aafc56c151cf179938d",
         "android_client_info": {
-          "package_name": "com.example.fooddeliveryapp"
+          "package_name": "com.example.firebaseauthapp"
         }
       },
-      "oauth_client": [
-        {
-          "client_id": "888905637057-qocd8ikl0k0d8aoonk6j647rp3nebtoq.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.example.fooddeliveryapp",
-            "certificate_hash": "2f8c109cb1a6a30c7c571c72507d70617c3a156e"
-          }
-        },
-        {
-          "client_id": "888905637057-8b8bbij0ghegpujh3ahh702qtl8hpu7d.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
+      "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyDXuT1KFGUZHm72Tx8vSSjc_EdDFsi1wDg"
+          "current_key": "AIzaSyDL9Is7hFnZ_wTJBDIQEIOsUQbSqM4L4e4"
         }
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": [
-            {
-              "client_id": "888905637057-8b8bbij0ghegpujh3ahh702qtl8hpu7d.apps.googleusercontent.com",
-              "client_type": 3
-            }
-          ]
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:482805813880:android:e97564238301463079938d",
+        "android_client_info": {
+          "package_name": "com.example.fooddeliveryapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDL9Is7hFnZ_wTJBDIQEIOsUQbSqM4L4e4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
         }
       }
     }

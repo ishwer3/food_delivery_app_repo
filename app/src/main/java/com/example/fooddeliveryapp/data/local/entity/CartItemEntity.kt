@@ -6,10 +6,6 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.example.fooddeliveryapp.data.local.model.CartItem
 
-/**
- * Room Entity representing a cart item in the database
- * Uses @Embedded to store the complete PopularItemEntity within this table
- */
 @Entity(tableName = "cart_items")
 data class CartItemEntity(
     @PrimaryKey

@@ -5,7 +5,7 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.hilt)
     alias(libs.plugins.google.services)
-    alias(libs.plugins.kotlin.kapt)
+    alias(libs.plugins.kotlin.ksp)
 }   
 
 android {
@@ -62,13 +62,13 @@ dependencies {
 
     // Hilt - Dependency Injection
     implementation(libs.hilt.android)
-    kapt(libs.hilt.compiler)
+    ksp(libs.hilt.compiler)
     implementation(libs.hilt.navigation.compose)
 
     // Room - Database
     implementation(libs.room.runtime)
     implementation(libs.room.ktx)
-    kapt(libs.room.compiler)
+    ksp(libs.room.compiler)
 
     // Firebase
     implementation(platform(libs.firebase.bom))
@@ -110,7 +110,7 @@ dependencies {
 
     // Hilt Testing
     androidTestImplementation("com.google.dagger:hilt-android-testing:2.52")
-    kaptAndroidTest("com.google.dagger:hilt-android-compiler:2.52")
+    kspAndroidTest("com.google.dagger:hilt-android-compiler:2.52")
 
     // Debug
     debugImplementation(libs.androidx.ui.tooling)
