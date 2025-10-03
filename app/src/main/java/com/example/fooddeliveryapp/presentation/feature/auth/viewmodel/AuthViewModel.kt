@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.fooddeliveryapp.data.local.Constants.TAG
+import com.example.fooddeliveryapp.data.local.session.SessionManager
 import com.example.fooddeliveryapp.domain.usecase.LoginUseCase
 import com.example.fooddeliveryapp.presentation.feature.auth.intent.AuthIntent
 import com.example.fooddeliveryapp.presentation.feature.auth.state.AuthState
@@ -13,12 +14,14 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class AuthViewModel @Inject constructor(
-    private val loginUseCase: LoginUseCase
+    private val loginUseCase: LoginUseCase,
+    private val sessionManager: SessionManager
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(AuthState())
@@ -63,24 +66,53 @@ class AuthViewModel @Inject constructor(
         // TODO: Implement register logic
     }
 
-    private fun handleLogout() {
+    fun handleLogout() {
         viewModelScope.launch {
             _state.value = _state.value.copy(isLoading = true)
 
-            loginUseCase.logout()
-                .onSuccess {
-                    _state.value = _state.value.copy(
-                        isLoading = false,
-                        isLoggedIn = false,
-                        error = null
-                    )
-                }
-                .onFailure { exception ->
-                    _state.value = _state.value.copy(
-                        isLoading = false,
-                        error = exception.message ?: "Logout failed"
-                    )
-                }
+            try {
+                // Clear session using SessionManager
+                sessionManager.clearSession()
+                _state.value = _state.value.copy(
+                    isLoading = false,
+                    isLoggedIn = false,
+                    user = null,
+                    error = null
+                )
+            } catch (e: Exception) {
+                _state.value = _state.value.copy(
+                    isLoading = false,
+                    error = e.message ?: "Logout failed"
+                )
+            }
+        }
+    }
+
+    // Save user session after OTP verification
+    fun saveUserSession(
+        userId: String = "user_${System.currentTimeMillis()}",
+        username: String = "user",
+        email: String = "user@example.com",
+        name: String = "User",
+        accessToken: String = "dummy_access_token",
+        refreshToken: String = "dummy_refresh_token"
+    ) {
+        viewModelScope.launch {
+            try {
+                sessionManager.saveUserSession(
+                    userId = userId,
+                    username = username,
+                    email = email,
+                    name = name,
+                    accessToken = accessToken,
+                    refreshToken = refreshToken
+                )
+                _state.value = _state.value.copy(isLoggedIn = true)
+            } catch (e: Exception) {
+                _state.value = _state.value.copy(
+                    error = e.message ?: "Failed to save session"
+                )
+            }
         }
     }
 
@@ -88,7 +120,7 @@ class AuthViewModel @Inject constructor(
     fun checkAuthenticationState() {
         viewModelScope.launch {
             try {
-                val isLoggedIn = loginUseCase.isLoggedIn()
+                val isLoggedIn = sessionManager.isLoggedIn.first()
                 _state.value = _state.value.copy(isLoggedIn = isLoggedIn)
             } catch (e: Exception) {
                 _state.value = _state.value.copy(isLoggedIn = false)

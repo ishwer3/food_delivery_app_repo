@@ -16,7 +16,7 @@ fun NavGraphBuilder.homeNavGraph(navController: NavController){
         DashboardScreen(
             onNavigateToAuth = {
                 navController.navigate(AuthRoutes.SplashRoute) {
-                    popUpTo(HomeRoutes.DashboardRoute) { inclusive = true }
+                    popUpTo(0) { inclusive = true }
                 }
             },
             onBuyNowClick = {

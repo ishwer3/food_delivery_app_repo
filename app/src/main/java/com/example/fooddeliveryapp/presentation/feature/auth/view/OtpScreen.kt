@@ -31,12 +31,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.fooddeliveryapp.presentation.common.component.TopCurvedView
+import com.example.fooddeliveryapp.presentation.feature.auth.viewmodel.AuthViewModel
 import com.example.fooddeliveryapp.ui.theme.whiteStyle
 
 @Composable
 fun OtpScreen(
-    onContinueClick: () -> Unit
+    onContinueClick: () -> Unit,
+    viewModel: AuthViewModel = hiltViewModel()
 ) {
     var otpCode by remember { mutableStateOf("") }
     val maxOtpLength = 4
@@ -128,6 +131,8 @@ fun OtpScreen(
                                     if (otpCode.length < maxOtpLength) {
                                         otpCode += item
                                         if (otpCode.length == maxOtpLength) {
+                                            // Save session when OTP is complete
+                                            viewModel.saveUserSession()
                                             // Auto-continue when OTP is complete
                                             onContinueClick()
                                         }

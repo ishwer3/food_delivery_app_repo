@@ -152,9 +152,12 @@ fun DashboardScreen(
                     ProfileScreen(onNavigateToAuth = onNavigateToAuth)
                 }
                 composable<HomeRoutes.SettingsRoute> {
-                    SettingsScreen(onItemClick = {
-                        navController.navigate(HomeRoutes.MapRoute)
-                    })
+                    SettingsScreen(
+                        onItemClick = {
+                            navController.navigate(HomeRoutes.MapRoute)
+                        },
+                        onLogout = onNavigateToAuth
+                    )
                 }
                 composable("user") {
                     UserScreen()

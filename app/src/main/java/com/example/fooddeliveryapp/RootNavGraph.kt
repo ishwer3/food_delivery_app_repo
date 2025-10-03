@@ -14,7 +14,7 @@ fun RootNavGraph(
 ) {
     NavHost(
         navController = navController,
-        startDestination = HomeRoutes.DashboardRoute
+        startDestination = AuthRoutes.SplashRoute
     ) {
         authNavGraph(navController = navController)
         homeNavGraph(navController = navController)
