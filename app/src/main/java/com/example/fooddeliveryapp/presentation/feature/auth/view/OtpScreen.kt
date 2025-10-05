@@ -131,8 +131,6 @@ fun OtpScreen(
                                     if (otpCode.length < maxOtpLength) {
                                         otpCode += item
                                         if (otpCode.length == maxOtpLength) {
-                                            // Save session when OTP is complete
-                                            viewModel.saveUserSession()
                                             // Auto-continue when OTP is complete
                                             onContinueClick()
                                         }

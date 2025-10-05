@@ -28,9 +28,51 @@ class FilterViewModel : ViewModel() {
             is FilterType.Hotel -> allItems.filter { it.hotelName == filter.hotelName }
         }
 
+        // Apply search query if present
+        val searchFiltered = if (_state.value.searchQuery.isNotBlank()) {
+            filtered.filter { item ->
+                item.title.contains(_state.value.searchQuery, ignoreCase = true) ||
+                item.hotelName.contains(_state.value.searchQuery, ignoreCase = true)
+            }
+        } else {
+            filtered
+        }
+
         _state.value = _state.value.copy(
-            popularItems = filtered,
+            popularItems = searchFiltered,
             selectedFilter = filter
         )
+    }
+
+    fun onSearchQueryChange(query: String) {
+        _state.value = _state.value.copy(searchQuery = query)
+
+        // Re-apply current filter with new search query
+        val allItems = PopularItem.getPopularItems()
+        val currentFilter = _state.value.selectedFilter
+
+        val filtered = when (currentFilter) {
+            is FilterType.All -> allItems
+            is FilterType.Rating -> allItems.filter { it.rating >= currentFilter.minRating }
+            is FilterType.Price -> when (currentFilter.range) {
+                PriceRange.Under10 -> allItems.filter { it.price < 10 }
+                PriceRange.TenToFifteen -> allItems.filter { it.price in 10.0..15.0 }
+                PriceRange.Above15 -> allItems.filter { it.price > 15 }
+            }
+            is FilterType.Diet -> allItems.filter { it.isVegetarian == currentFilter.isVeg }
+            is FilterType.Hotel -> allItems.filter { it.hotelName == currentFilter.hotelName }
+        }
+
+        // Apply search query
+        val searchFiltered = if (query.isNotBlank()) {
+            filtered.filter { item ->
+                item.title.contains(query, ignoreCase = true) ||
+                item.hotelName.contains(query, ignoreCase = true)
+            }
+        } else {
+            filtered
+        }
+
+        _state.value = _state.value.copy(popularItems = searchFiltered)
     }
 }

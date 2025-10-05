@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.fooddeliveryapp.data.local.Constants.TAG
 import com.example.fooddeliveryapp.data.local.session.SessionManager
 import com.example.fooddeliveryapp.domain.usecase.LoginUseCase
+import com.example.fooddeliveryapp.domain.model.User
 import com.example.fooddeliveryapp.presentation.feature.auth.intent.AuthIntent
 import com.example.fooddeliveryapp.presentation.feature.auth.state.AuthState
 import com.example.fooddeliveryapp.presentation.feature.auth.state.EmailValidationState
@@ -27,6 +28,10 @@ class AuthViewModel @Inject constructor(
     private val _state = MutableStateFlow(AuthState())
     val state: StateFlow<AuthState> = _state.asStateFlow()
 
+    init {
+        checkAuthenticationState()
+    }
+
     fun handleIntent(intent: AuthIntent) {
         when (intent) {
             is AuthIntent.Login -> handleLogin(intent.username, intent.password)
@@ -47,6 +52,21 @@ class AuthViewModel @Inject constructor(
             loginUseCase(username, password)
                 .onSuccess { user ->
                     Log.d(TAG,"handleLogin: $user")
+                    Log.d(TAG,"Saving to DataStore - userId: ${user.id}, username: $username, email: ${user.email}, name: ${user.name}")
+
+                    // Save user session to DataStore
+                    sessionManager.saveUserSession(
+                        userId = user.id,
+                        username = username,
+                        email = user.email,
+                        name = user.name,
+                        profileImageUrl = user.profileImageUrl,
+                        accessToken = "dummy_access_token",
+                        refreshToken = "dummy_refresh_token"
+                    )
+
+                    Log.d(TAG,"Data saved to DataStore successfully")
+
                     _state.value = _state.value.copy(
                         isLoading = false,
                         user = user,
@@ -107,7 +127,15 @@ class AuthViewModel @Inject constructor(
                     accessToken = accessToken,
                     refreshToken = refreshToken
                 )
-                _state.value = _state.value.copy(isLoggedIn = true)
+                val user = User(
+                    id = userId,
+                    email = email,
+                    name = name
+                )
+                _state.value = _state.value.copy(
+                    isLoggedIn = true,
+                    user = user
+                )
             } catch (e: Exception) {
                 _state.value = _state.value.copy(
                     error = e.message ?: "Failed to save session"
@@ -121,9 +149,29 @@ class AuthViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 val isLoggedIn = sessionManager.isLoggedIn.first()
-                _state.value = _state.value.copy(isLoggedIn = isLoggedIn)
+                val userSession = sessionManager.currentUser.first()
+
+                Log.d(TAG, "checkAuthenticationState - isLoggedIn: $isLoggedIn")
+                Log.d(TAG, "checkAuthenticationState - userSession: $userSession")
+
+                val user = userSession?.let {
+                    User(
+                        id = it.userId,
+                        email = it.email,
+                        name = it.name,
+                        profileImageUrl = it.profileImageUrl
+                    )
+                }
+
+                Log.d(TAG, "checkAuthenticationState - user: $user")
+
+                _state.value = _state.value.copy(
+                    isLoggedIn = isLoggedIn,
+                    user = user
+                )
             } catch (e: Exception) {
-                _state.value = _state.value.copy(isLoggedIn = false)
+                Log.e(TAG, "checkAuthenticationState - Error: ${e.message}", e)
+                _state.value = _state.value.copy(isLoggedIn = false, user = null)
             }
         }
     }

@@ -20,17 +20,28 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.fooddeliveryapp.presentation.common.component.CommonSnackbar
+import com.example.fooddeliveryapp.presentation.common.component.rememberSnackbarState
 
 @Composable
 fun PaymentCardScreen(
     onPaymentSuccess: () -> Unit = {}
 ) {
+    var cardNumber by remember { mutableStateOf("") }
+    var expiryDate by remember { mutableStateOf("") }
+    var cvv by remember { mutableStateOf("") }
+    val snackbarState = rememberSnackbarState()
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -157,8 +168,8 @@ fun PaymentCardScreen(
                 )
 
                 OutlinedTextField(
-                    value = "",
-                    onValueChange = {},
+                    value = cardNumber,
+                    onValueChange = { cardNumber = it },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(top = 8.dp),
@@ -187,8 +198,8 @@ fun PaymentCardScreen(
                         )
 
                         OutlinedTextField(
-                            value = "",
-                            onValueChange = {},
+                            value = expiryDate,
+                            onValueChange = { expiryDate = it },
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(top = 8.dp),
@@ -212,8 +223,8 @@ fun PaymentCardScreen(
                         )
 
                         OutlinedTextField(
-                            value = "",
-                            onValueChange = {},
+                            value = cvv,
+                            onValueChange = { cvv = it },
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(top = 8.dp),
@@ -234,7 +245,25 @@ fun PaymentCardScreen(
 
             // Submit Button
             Button(
-                onClick = onPaymentSuccess,
+                onClick = {
+                    when {
+                        cardNumber.isBlank() -> {
+                            snackbarState.showError("Please enter card number")
+                        }
+                        cardNumber.replace(" ", "").length != 16 -> {
+                            snackbarState.showError("Card number must be 16 digits")
+                        }
+                        expiryDate.isBlank() -> {
+                            snackbarState.showError("Please enter expiry date")
+                        }
+                        cvv.isBlank() -> {
+                            snackbarState.showError("Please enter CVV")
+                        }
+                        else -> {
+                            onPaymentSuccess()
+                        }
+                    }
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
@@ -253,5 +282,13 @@ fun PaymentCardScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
         }
+
+        // Snackbar
+        CommonSnackbar(
+            modifier = Modifier.align(Alignment.BottomCenter),
+            message = snackbarState.message,
+            type = snackbarState.type,
+            onDismiss = { snackbarState.dismiss() }
+        )
     }
 }

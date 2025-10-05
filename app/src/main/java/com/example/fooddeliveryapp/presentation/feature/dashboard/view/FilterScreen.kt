@@ -13,6 +13,12 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Icon
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -53,6 +59,30 @@ fun SearchScreen(
                 )
             }
         }
+
+        VerticalSpacer(10.dp)
+
+        // Search Bar
+        OutlinedTextField(
+            value = state.searchQuery,
+            onValueChange = { filterViewModel.onSearchQueryChange(it) },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
+            placeholder = { Text("Search food or restaurant...") },
+            leadingIcon = {
+                Icon(
+                    imageVector = Icons.Default.Search,
+                    contentDescription = "Search"
+                )
+            },
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = Color(0xFFFF9800),
+                unfocusedBorderColor = Color.Gray
+            ),
+            shape = RoundedCornerShape(12.dp),
+            singleLine = true
+        )
 
         VerticalSpacer(10.dp)
 

@@ -5,5 +5,6 @@ import com.example.fooddeliveryapp.presentation.feature.dashboard.model.FilterTy
 
 data class FilterState(
     val popularItems: List<PopularItem> = PopularItem.getPopularItems(),
-    val selectedFilter: FilterType = FilterType.All
+    val selectedFilter: FilterType = FilterType.All,
+    val searchQuery: String = ""
 )
