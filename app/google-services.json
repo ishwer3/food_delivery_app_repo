@@ -1,33 +1,13 @@
 {
   "project_info": {
-    "project_number": "482805813880",
-    "firebase_url": "https://fir-authapp-ad208-default-rtdb.firebaseio.com",
-    "project_id": "fir-authapp-ad208",
-    "storage_bucket": "fir-authapp-ad208.firebasestorage.app"
+    "project_number": "851101236041",
+    "project_id": "food-delivery-app-4d059",
+    "storage_bucket": "food-delivery-app-4d059.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:482805813880:android:658aafc56c151cf179938d",
-        "android_client_info": {
-          "package_name": "com.example.firebaseauthapp"
-        }
-      },
-      "oauth_client": [],
-      "api_key": [
-        {
-          "current_key": "AIzaSyDL9Is7hFnZ_wTJBDIQEIOsUQbSqM4L4e4"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": []
-        }
-      }
-    },
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:482805813880:android:e97564238301463079938d",
+        "mobilesdk_app_id": "1:851101236041:android:df8c2139dd926248e43898",
         "android_client_info": {
           "package_name": "com.example.fooddeliveryapp"
         }
@@ -35,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyDL9Is7hFnZ_wTJBDIQEIOsUQbSqM4L4e4"
+          "current_key": "AIzaSyApqH3Whn5m6A6QyCB1MiB0CTPCxsrPue4"
         }
       ],
       "services": {
