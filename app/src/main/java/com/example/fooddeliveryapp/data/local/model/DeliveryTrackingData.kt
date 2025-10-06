@@ -1,5 +1,10 @@
 package com.example.fooddeliveryapp.data.local.model
 
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import coil.compose.rememberAsyncImagePainter
 import com.google.android.gms.maps.model.LatLng
 
 data class DeliveryPerson(
@@ -65,4 +70,31 @@ object MockDeliveryData {
             LatLng(37.7849, -122.4094)  // Delivery location
         )
     }
+}
+
+@Composable
+fun StaticMapImageWithPolyline(apiKey: String) {
+    // 1. Define your polyline points (LatLng objects)
+    // For simplicity, we'll use a short, unencoded path format
+    val pathCoordinates = "40.7128,-74.0060|34.0522,-118.2437" // NY to LA
+
+    // 2. Construct the Static Map API URL
+    // Center: somewhere between the points (or use one of the points)
+    // path=color:0xff0000ff|weight:5|40.7128,-74.0060|34.0522,-118.2437
+    val staticMapUrl = "https://maps.googleapis.com/maps/api/staticmap?" +
+            "center=37.0902,-95.7129" + // Center of the map
+            "&zoom=3" + // Zoom level
+            "&size=400x400" + // Image dimensions
+            "&maptype=roadmap" +
+            "&path=color:0xff0000ff|weight:5|${pathCoordinates}" + // Red Polyline
+            "&key=${apiKey}" // Your Google Maps API Key
+
+    // 3. Load the image using Coil
+    val painter = rememberAsyncImagePainter(model = staticMapUrl)
+
+    Image(
+        painter = painter,
+        contentDescription = "Static map with polyline",
+        modifier = Modifier.fillMaxSize()
+    )
 }
