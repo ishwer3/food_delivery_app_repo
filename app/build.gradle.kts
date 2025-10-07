@@ -6,20 +6,24 @@ plugins {
     alias(libs.plugins.hilt)
     alias(libs.plugins.google.services)
     alias(libs.plugins.kotlin.ksp)
-}   
+}
+
+val apiKey: String = project.findProperty("API_KEY") as? String ?: ""
 
 android {
-    namespace = "com.example.fooddeliveryapp"
+    namespace = "com.example.deliveryapp"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.example.fooddeliveryapp"
+        applicationId = "com.example.deliveryapp"
         minSdk = 24
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
 
-        testInstrumentationRunner = "com.example.fooddeliveryapp.HiltTestRunner"
+        manifestPlaceholders["apiKey"] = apiKey
+
+        testInstrumentationRunner = "com.example.deliveryapp.HiltTestRunner"
     }
 
     buildTypes {
