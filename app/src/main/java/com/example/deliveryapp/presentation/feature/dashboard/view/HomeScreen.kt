@@ -69,7 +69,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun HomeScreen(
     cartViewModel: CartViewModel,
-    onFoodItemClick: (String) -> Unit = {},
+    onFoodItemClick: (PopularItem) -> Unit = {},
     onCategoryClick: (String) -> Unit = {},
     onSearchClick: () -> Unit = {},
     onSeeAllClick: () -> Unit = {},
@@ -258,6 +258,11 @@ fun HomeScreen(
                         PopularItemCard(
                             item = item,
                             onItemClick = {
+                                // Navigate to details screen
+                                onFoodItemClick(item)
+                            },
+                            onOrderNowClick = {
+                                // Open bottom sheet for ordering
                                 selectedItem = item
                                 coroutineScope.launch {
                                     sheetState.show()
@@ -357,6 +362,7 @@ fun CategoryItem(item: CategoryModel, onItemClick: (item: CategoryModel) -> Unit
 fun PopularItemCard(
     item: PopularItem,
     onItemClick: () -> Unit,
+    onOrderNowClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -520,6 +526,24 @@ fun PopularItemCard(
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         color = Color(0xFFFF9800),
+                        fontSize = 14.sp
+                    )
+                }
+
+                // Order Now Button
+                Spacer(modifier = Modifier.height(8.dp))
+                androidx.compose.material3.Button(
+                    onClick = onOrderNowClick,
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFFF1D431)
+                    ),
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Text(
+                        text = "Order Now",
+                        color = Color.Black,
+                        fontWeight = FontWeight.Bold,
                         fontSize = 14.sp
                     )
                 }

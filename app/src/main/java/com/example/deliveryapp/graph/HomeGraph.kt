@@ -3,8 +3,11 @@ package com.example.deliveryapp.graph
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
+import androidx.navigation.toRoute
+import com.example.deliveryapp.data.local.model.PopularItem
 import com.example.deliveryapp.presentation.feature.dashboard.view.CategoryScreen
 import com.example.deliveryapp.presentation.feature.dashboard.view.DashboardScreen
+import com.example.deliveryapp.presentation.feature.dashboard.view.FoodDetailsScreen
 import com.example.deliveryapp.presentation.feature.dashboard.view.PaymentCardScreen
 import com.example.deliveryapp.presentation.feature.dashboard.view.settings.MapScreen
 import com.example.deliveryapp.presentation.feature.delivery.view.DeliveryTrackingScreen
@@ -25,6 +28,9 @@ fun NavGraphBuilder.homeNavGraph(navController: NavController){
             onNavigateToCategory = {
 //                navController.navigate(HomeRoutes.SeeAllCategoriesRoute)
                 navController.navigate(HomeRoutes.FilterScreen)
+            },
+            onNavigateToFoodDetails = { foodId ->
+                navController.navigate(HomeRoutes.FoodDetailRoute(foodId))
             }
         )
     }
@@ -53,6 +59,18 @@ fun NavGraphBuilder.homeNavGraph(navController: NavController){
             onCallDriver = { phoneNumber ->
                 // Handle call driver functionality
                 // You can implement intent to dial the phone number
+            }
+        )
+    }
+
+    composable<HomeRoutes.FoodDetailRoute> { backStackEntry ->
+        val route = backStackEntry.toRoute<HomeRoutes.FoodDetailRoute>()
+        val foodId = route.foodId
+
+        FoodDetailsScreen(
+            foodId = foodId,
+            onBackClick = {
+                navController.popBackStack()
             }
         )
     }

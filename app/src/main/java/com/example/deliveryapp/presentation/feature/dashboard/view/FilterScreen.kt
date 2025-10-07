@@ -102,7 +102,10 @@ fun SearchScreen(
                 PopularItemCard(
                     item = item,
                     onItemClick = {
-
+                        // Navigate to details
+                    },
+                    onOrderNowClick = {
+                        // Open order bottom sheet
                     }
                 )
             }

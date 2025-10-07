@@ -30,7 +30,8 @@ fun DashboardScreen(
     navController: NavHostController = rememberNavController(),
     onNavigateToAuth: () -> Unit = {},
     onNavigateToCategory: () -> Unit = {},
-    onBuyNowClick: () -> Unit = {}
+    onBuyNowClick: () -> Unit = {},
+    onNavigateToFoodDetails: (String) -> Unit = {}
 ) {
     val cartViewModel: CartViewModel = hiltViewModel()
 
@@ -41,11 +42,15 @@ fun DashboardScreen(
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
+    // Check if we should show bottom bar
+    val showBottomBar = currentRoute?.contains("FoodDetailRoute") != true
+
     Box(modifier = Modifier.fillMaxSize()) {
         Scaffold(
             modifier = Modifier.fillMaxSize(),
             bottomBar = {
-                NavigationBar {
+                if (showBottomBar) {
+                    NavigationBar {
                     bottomNavItems.forEachIndexed { index, item ->
                         // Check if current route matches this bottom nav item
                         // For type-safe routes, the route string contains the full class name
@@ -142,6 +147,7 @@ fun DashboardScreen(
                             )
                         }
                     }
+                    }
                 }
             }
         ) { innerPadding ->
@@ -153,7 +159,10 @@ fun DashboardScreen(
                 composable("home") {
                     HomeScreen(
                         cartViewModel = cartViewModel,
-                        onSeeAllClick = onNavigateToCategory
+                        onSeeAllClick = onNavigateToCategory,
+                        onFoodItemClick = { item ->
+                            onNavigateToFoodDetails(item.id)
+                        }
                     )
                 }
                 composable("search") {
