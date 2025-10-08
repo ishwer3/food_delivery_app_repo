@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -16,6 +17,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -29,7 +31,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.example.deliveryapp.data.local.model.PopularItem
 import com.example.deliveryapp.presentation.common.component.TopCurvedView
 import com.example.deliveryapp.presentation.feature.dashboard.model.FilterType
@@ -40,10 +42,10 @@ import com.example.deliveryapp.ui.spacer.VerticalSpacer
 
 @Composable
 fun SearchScreen(
-    filterViewModel: FilterViewModel = viewModel()
+    filterViewModel: FilterViewModel = hiltViewModel()
 ) {
     val state by filterViewModel.state.collectAsState()
-    val hotelNames = PopularItem.getPopularItems().map { it.hotelName }.distinct()
+    val hotelNames = state.allItems.map { it.hotelName }.distinct()
 
     Column(modifier = Modifier.fillMaxSize()) {
         TopCurvedView {
@@ -93,27 +95,39 @@ fun SearchScreen(
             hotelNames = hotelNames
         )
 
-        LazyColumn(
-            modifier = Modifier.fillMaxWidth().padding(20.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp),
-            contentPadding = PaddingValues(vertical = 16.dp)
-        ) {
-            items(state.popularItems){  item ->
-                PopularItemCard(
-                    item = item,
-                    onItemClick = {
-                        // Navigate to details
-                    },
-                    onOrderNowClick = {
-                        // Open order bottom sheet
-                    }
+        // Loading and content
+        if (state.isLoading) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(20.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(50.dp),
+                    color = Color(0xFFFF9800)
                 )
             }
+        } else {
+            LazyColumn(
+                modifier = Modifier.fillMaxWidth().padding(20.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp),
+                contentPadding = PaddingValues(vertical = 16.dp)
+            ) {
+                items(state.popularItems) { item ->
+                    PopularItemCard(
+                        item = item,
+                        onItemClick = {
+                            // Navigate to details
+                        },
+                        onOrderNowClick = {
+                            // Open order bottom sheet
+                        }
+                    )
+                }
+            }
         }
-
-
     }
-
 }
 
 @Composable
