@@ -50,10 +50,13 @@ import com.example.deliveryapp.ui.spacer.VerticalSpacer
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddressScreen(
+    hotelName: String = "",
     onBackClick: () -> Unit = {},
     onAddressSelected: (String) -> Unit = {}
 ) {
     var searchText by remember { mutableStateOf("") }
+    var fromAddress by remember { mutableStateOf(hotelName) }
+    var toAddress by remember { mutableStateOf("") }
     val keyboardController = LocalSoftwareKeyboardController.current
 
     // Mock address suggestions (in a real app, these would come from a location API)
@@ -166,22 +169,24 @@ fun AddressScreen(
                             HorizontalSpacer(8.dp)
 
                             BasicTextField(
-                                value = "",
-                                onValueChange = {},
+                                value = fromAddress,
+                                onValueChange = { fromAddress = it },
                                 modifier = Modifier.weight(1f),
                                 textStyle = TextStyle(
                                     color = Color.White,
                                     fontSize = 16.sp
                                 ),
                                 decorationBox = { innerTextField ->
-                                    if (true) {
-                                        Text(
-                                            text = "Lorem ipsum dolor sit",
-                                            color = Color.White,
-                                            fontSize = 16.sp
-                                        )
+                                    Box {
+                                        if (fromAddress.isEmpty()) {
+                                            Text(
+                                                text = "Enter pickup location",
+                                                color = Color.White.copy(alpha = 0.6f),
+                                                fontSize = 16.sp
+                                            )
+                                        }
+                                        innerTextField()
                                     }
-                                    innerTextField()
                                 }
                             )
                         }
@@ -204,22 +209,24 @@ fun AddressScreen(
 
                             HorizontalSpacer(8.dp)
                             BasicTextField(
-                                value = "",
-                                onValueChange = {},
+                                value = toAddress,
+                                onValueChange = { toAddress = it },
                                 modifier = Modifier.weight(1f),
                                 textStyle = TextStyle(
                                     color = Color.White,
                                     fontSize = 16.sp
                                 ),
                                 decorationBox = { innerTextField ->
-                                    if (true) {
-                                        Text(
-                                            text = "Lorem ipsum dolor sit",
-                                            color = Color.White,
-                                            fontSize = 16.sp
-                                        )
+                                    Box {
+                                        if (toAddress.isEmpty()) {
+                                            Text(
+                                                text = "Enter delivery location",
+                                                color = Color.White.copy(alpha = 0.6f),
+                                                fontSize = 16.sp
+                                            )
+                                        }
+                                        innerTextField()
                                     }
-                                    innerTextField()
                                 }
                             )
                         }
@@ -307,6 +314,7 @@ fun AddressScreen(
                         AddressSuggestionCard(
                             address = address,
                             onClick = {
+                                toAddress = address
                                 onAddressSelected(address)
                             }
                         )

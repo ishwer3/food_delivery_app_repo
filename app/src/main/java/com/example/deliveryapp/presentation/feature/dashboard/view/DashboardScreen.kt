@@ -17,6 +17,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.toRoute
 import com.example.deliveryapp.presentation.common.component.BadgedNavigationItem
 import com.example.deliveryapp.presentation.feature.dashboard.navigation.bottomNavItems
 import com.example.deliveryapp.presentation.feature.dashboard.view.cart.view.CartScreen
@@ -174,9 +175,8 @@ fun DashboardScreen(
                         onBuyNowClick = {
                             onBuyNowClick()
                         },
-                        onEnterAddressClick = {
-                            navController.navigate(HomeRoutes.AddressRoute)
-                            // Handle enter address - navigate to address screen
+                        onEnterAddressClick = { hotelName ->
+                            navController.navigate(HomeRoutes.AddressRoute(hotelName))
                         }
                     )
                 }
@@ -209,8 +209,10 @@ fun DashboardScreen(
                     MapScreen()
                 }
 
-                composable<HomeRoutes.AddressRoute> {
+                composable<HomeRoutes.AddressRoute> { backStackEntry ->
+                    val addressRoute = backStackEntry.toRoute<HomeRoutes.AddressRoute>()
                     AddressScreen(
+                        hotelName = addressRoute.hotelName,
                         onBackClick = {
                             navController.popBackStack()
                         }

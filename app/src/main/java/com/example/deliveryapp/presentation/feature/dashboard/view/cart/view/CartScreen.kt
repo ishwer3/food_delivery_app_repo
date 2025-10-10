@@ -47,7 +47,7 @@ import com.example.deliveryapp.presentation.state.CartViewModel
 fun CartScreen(
     cartViewModel: CartViewModel,
     onBuyNowClick: () -> Unit = {},
-    onEnterAddressClick: () -> Unit = {}
+    onEnterAddressClick: (String) -> Unit = {}
 ) {
     // Observe cart state changes from StateFlow
     val cartItems by cartViewModel.cartItems.collectAsState()
@@ -161,7 +161,11 @@ fun CartScreen(
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     OutlinedButton(
-                        onClick = onEnterAddressClick,
+                        onClick = {
+                            if (cartItems.isNotEmpty()) {
+                                onEnterAddressClick(cartItems.first().popularItem.hotelName)
+                            }
+                        },
                         modifier = Modifier.weight(1f),
                         shape = RoundedCornerShape(8.dp)
                     ) {
