@@ -1,5 +1,6 @@
 package com.example.deliveryapp.graph
 
+import androidx.compose.runtime.collectAsState
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
@@ -15,8 +16,18 @@ import com.example.deliveryapp.routes.AuthRoutes
 import com.example.deliveryapp.routes.HomeRoutes
 
 fun NavGraphBuilder.homeNavGraph(navController: NavController){
-    composable<HomeRoutes.DashboardRoute> {
+    composable<HomeRoutes.DashboardRoute> { backStackEntry ->
+        // Get selected category from savedStateHandle
+        val selectedCategory = backStackEntry.savedStateHandle
+            .getStateFlow<String?>("selected_category", null)
+            .collectAsState().value
+
         DashboardScreen(
+            selectedCategory = selectedCategory,
+            onCategoryHandled = {
+                // Clear the saved state after handling
+                backStackEntry.savedStateHandle.set("selected_category", null as String?)
+            },
             onNavigateToAuth = {
                 navController.navigate(AuthRoutes.SplashRoute) {
                     popUpTo(0) { inclusive = true }
@@ -26,8 +37,7 @@ fun NavGraphBuilder.homeNavGraph(navController: NavController){
                 navController.navigate(HomeRoutes.PaymentRoute)
             },
             onNavigateToCategory = {
-//                navController.navigate(HomeRoutes.SeeAllCategoriesRoute)
-                navController.navigate(HomeRoutes.FilterScreen)
+                navController.navigate(HomeRoutes.SeeAllCategoriesRoute)
             },
             onNavigateToFoodDetails = { foodId ->
                 navController.navigate(HomeRoutes.FoodDetailRoute(foodId))
@@ -40,7 +50,15 @@ fun NavGraphBuilder.homeNavGraph(navController: NavController){
     }
 
     composable<HomeRoutes.SeeAllCategoriesRoute> {
-        CategoryScreen()
+        CategoryScreen(
+            onCategoryClick = { categoryTitle ->
+                // Navigate back to home with the selected category
+                navController.previousBackStackEntry
+                    ?.savedStateHandle
+                    ?.set("selected_category", categoryTitle)
+                navController.popBackStack()
+            }
+        )
     }
 
     composable<HomeRoutes.PaymentRoute> {

@@ -1,5 +1,6 @@
 package com.example.deliveryapp.presentation.feature.dashboard.view
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -34,6 +35,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -53,6 +55,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import com.example.deliveryapp.data.local.Constants.TAG
 import com.example.deliveryapp.data.local.model.CategoryModel
 import com.example.deliveryapp.data.local.model.CategoryModel.Companion.getSampleCategories
 import com.example.deliveryapp.data.local.model.PopularItem
@@ -73,7 +76,9 @@ fun HomeScreen(
     onCategoryClick: (String) -> Unit = {},
     onSearchClick: () -> Unit = {},
     onSeeAllClick: () -> Unit = {},
-    homeViewModel: HomeViewModel = hiltViewModel()
+    homeViewModel: HomeViewModel = hiltViewModel(),
+    selectedCategory: String? = null,
+    onCategoryHandled: () -> Unit = {}
 ) {
     val sheetState = rememberModalBottomSheetState()  // Allow full expansion
     val coroutineScope = rememberCoroutineScope()
@@ -83,6 +88,16 @@ fun HomeScreen(
 
     // Collect state from HomeViewModel
     val homeState by homeViewModel.state.collectAsState()
+
+    // Listen for selected category from navigation
+    LaunchedEffect(selectedCategory) {
+        Log.d(TAG, "HomeScreen: Selected Category -> $selectedCategory")
+        if (selectedCategory != null && selectedCategory.isNotEmpty()) {
+            homeViewModel.handleIntent(HomeIntent.FilterByCategory(selectedCategory))
+            // Clear the category after handling
+            onCategoryHandled()
+        }
+    }
 
     // Handle search functionality
     val handleSearch = {

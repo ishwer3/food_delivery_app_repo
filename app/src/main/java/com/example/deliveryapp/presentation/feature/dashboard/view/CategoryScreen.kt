@@ -37,7 +37,9 @@ import com.example.deliveryapp.ui.theme.categoryTitleStyle
 import com.example.deliveryapp.ui.theme.categoryBodyStyle
 
 @Composable
-fun CategoryScreen() {
+fun CategoryScreen(
+    onCategoryClick: (String) -> Unit = {}
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -57,8 +59,8 @@ fun CategoryScreen() {
             )
         ) {
             items(getSampleCategories()) { item ->
-                CategoryCard(item) {
-
+                CategoryCard(item) { category ->
+                    onCategoryClick(category.title)
                 }
             }
         }

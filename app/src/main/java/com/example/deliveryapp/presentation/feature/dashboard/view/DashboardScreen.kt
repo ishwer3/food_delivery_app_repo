@@ -29,6 +29,8 @@ import com.example.deliveryapp.routes.HomeRoutes
 @Composable
 fun DashboardScreen(
     navController: NavHostController = rememberNavController(),
+    selectedCategory: String? = null,
+    onCategoryHandled: () -> Unit = {},
     onNavigateToAuth: () -> Unit = {},
     onNavigateToCategory: () -> Unit = {},
     onBuyNowClick: () -> Unit = {},
@@ -157,13 +159,15 @@ fun DashboardScreen(
                 startDestination = bottomNavItems[0].route,
                 modifier = Modifier.fillMaxSize()
             ) {
-                composable("home") {
+                composable("home") { backStackEntry ->
                     HomeScreen(
                         cartViewModel = cartViewModel,
                         onSeeAllClick = onNavigateToCategory,
                         onFoodItemClick = { item ->
                             onNavigateToFoodDetails(item.id)
-                        }
+                        },
+                        selectedCategory = selectedCategory,
+                        onCategoryHandled = onCategoryHandled
                     )
                 }
                 composable("search") {
