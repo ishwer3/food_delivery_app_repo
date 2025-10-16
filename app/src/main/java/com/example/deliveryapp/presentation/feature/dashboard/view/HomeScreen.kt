@@ -89,6 +89,17 @@ fun HomeScreen(
     // Collect state from HomeViewModel
     val homeState by homeViewModel.state.collectAsState()
 
+    // Collect cart items to show quantity in cards
+    val cartItems by cartViewModel.cartItems.collectAsState()
+
+    // Debug logging to track cart items
+    LaunchedEffect(cartItems) {
+        Log.d(TAG, "HomeScreen: Cart items changed. Count: ${cartItems.size}")
+        cartItems.forEach { cartItem ->
+            Log.d(TAG, "HomeScreen: Cart item - ID: ${cartItem.popularItem.id}, Title: ${cartItem.popularItem.title}, Quantity: ${cartItem.quantity}")
+        }
+    }
+
     // Listen for selected category from navigation
     LaunchedEffect(selectedCategory) {
         Log.d(TAG, "HomeScreen: Selected Category -> $selectedCategory")
@@ -261,8 +272,20 @@ fun HomeScreen(
 
         // Show popular items from API or fallback data
         val popularItems = homeState.popularItems
+
         if (popularItems.isNotEmpty()) {
-            items(popularItems.chunked(2)) { rowItems ->
+            items(
+                count = popularItems.chunked(2).size,
+                key = { index ->
+                    val rowItems = popularItems.chunked(2)[index]
+                    // Create a unique key that includes cart quantities to force recomposition
+                    rowItems.joinToString("-") { item ->
+                        val qty = cartItems.find { it.popularItem.id == item.id }?.quantity ?: 0
+                        "${item.id}_$qty"
+                    }
+                }
+            ) { index ->
+                val rowItems = popularItems.chunked(2)[index]
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -270,6 +293,12 @@ fun HomeScreen(
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     rowItems.forEach { item ->
+                        // Find cart item for this popular item
+                        val cartItem = cartItems.find { it.popularItem.id == item.id }
+                        val quantity = cartItem?.quantity ?: 0
+
+                        Log.d(TAG, "HomeScreen: Displaying item - ID: ${item.id}, Title: ${item.title}, CartQuantity: $quantity, CartItemsCount: ${cartItems.size}")
+
                         PopularItemCard(
                             item = item,
                             onItemClick = {
@@ -281,6 +310,15 @@ fun HomeScreen(
                                 selectedItem = item
                                 coroutineScope.launch {
                                     sheetState.show()
+                                }
+                            },
+                            cartQuantity = quantity,
+                            onIncreaseQuantity = {
+                                cartViewModel.addToCart(item, 1)
+                            },
+                            onDecreaseQuantity = {
+                                if (cartItem != null) {
+                                    cartViewModel.updateQuantity(cartItem, quantity - 1)
                                 }
                             },
                             modifier = Modifier.weight(1f)
@@ -378,6 +416,9 @@ fun PopularItemCard(
     item: PopularItem,
     onItemClick: () -> Unit,
     onOrderNowClick: () -> Unit,
+    cartQuantity: Int = 0,
+    onIncreaseQuantity: () -> Unit = {},
+    onDecreaseQuantity: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -545,22 +586,84 @@ fun PopularItemCard(
                     )
                 }
 
-                // Order Now Button
+                // Order Now Button or Cart Controls
                 Spacer(modifier = Modifier.height(8.dp))
-                androidx.compose.material3.Button(
-                    onClick = onOrderNowClick,
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = androidx.compose.material3.ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFFF1D431)
-                    ),
-                    shape = RoundedCornerShape(8.dp)
-                ) {
-                    Text(
-                        text = "Order Now",
-                        color = Color.Black,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 14.sp
-                    )
+                if (cartQuantity > 0) {
+                    // Show cart controls with quantity
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(
+                                color = Color(0xFFF1D431),
+                                shape = RoundedCornerShape(8.dp)
+                            )
+                            .padding(vertical = 8.dp, horizontal = 12.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        // Minus button
+                        Box(
+                            modifier = Modifier
+                                .size(32.dp)
+                                .background(
+                                    color = Color.White,
+                                    shape = CircleShape
+                                )
+                                .clickable { onDecreaseQuantity() },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = "-",
+                                fontSize = 20.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.Black
+                            )
+                        }
+
+                        // Quantity display
+                        Text(
+                            text = cartQuantity.toString(),
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.Black
+                        )
+
+                        // Plus button
+                        Box(
+                            modifier = Modifier
+                                .size(32.dp)
+                                .background(
+                                    color = Color.White,
+                                    shape = CircleShape
+                                )
+                                .clickable { onIncreaseQuantity() },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = "+",
+                                fontSize = 20.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.Black
+                            )
+                        }
+                    }
+                } else {
+                    // Show Order Now button
+                    androidx.compose.material3.Button(
+                        onClick = onOrderNowClick,
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFFF1D431)
+                        ),
+                        shape = RoundedCornerShape(8.dp)
+                    ) {
+                        Text(
+                            text = "Order Now",
+                            color = Color.Black,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 14.sp
+                        )
+                    }
                 }
             }
         }
