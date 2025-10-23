@@ -18,14 +18,20 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -33,19 +39,44 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.example.deliveryapp.data.local.model.PopularItem
+import com.example.deliveryapp.presentation.common.component.FoodBottomSheet
 import com.example.deliveryapp.presentation.common.component.TopCurvedView
 import com.example.deliveryapp.presentation.feature.dashboard.model.FilterType
 import com.example.deliveryapp.presentation.feature.dashboard.model.PriceRange
 import com.example.deliveryapp.presentation.feature.dashboard.state.FilterState
 import com.example.deliveryapp.presentation.feature.dashboard.viewmodel.FilterViewModel
+import com.example.deliveryapp.presentation.state.CartViewModel
 import com.example.deliveryapp.ui.spacer.VerticalSpacer
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchScreen(
-    filterViewModel: FilterViewModel = hiltViewModel()
+    filterViewModel: FilterViewModel = hiltViewModel(),
+    cartViewModel: CartViewModel = hiltViewModel()
 ) {
+    val sheetState = rememberModalBottomSheetState()  // Allow full expansion
+    val coroutineScope = rememberCoroutineScope()
+    var selectedItem by remember { mutableStateOf<PopularItem?>(null) }
+
+
     val state by filterViewModel.state.collectAsState()
     val hotelNames = state.allItems.map { it.hotelName }.distinct()
+
+    // Collect cart items to show quantity in cards
+    val cartItems by cartViewModel.cartItems.collectAsState()
+
+    selectedItem?.let { item ->
+        FoodBottomSheet(
+            item = item,
+            sheetState = sheetState,
+            onDismiss = { selectedItem = null },
+            onAddToCart = { popularItem, quantity ->
+                cartViewModel.addToCart(popularItem, quantity)
+            }
+        )
+    }
 
     Column(modifier = Modifier.fillMaxSize()) {
         TopCurvedView {
@@ -115,6 +146,8 @@ fun SearchScreen(
                 contentPadding = PaddingValues(vertical = 16.dp)
             ) {
                 items(state.popularItems) { item ->
+                    val cartItem = cartItems.find { it.popularItem.id == item.id }
+                    val quantity = cartItem?.quantity ?: 0
                     PopularItemCard(
                         item = item,
                         onItemClick = {
@@ -122,7 +155,20 @@ fun SearchScreen(
                         },
                         onOrderNowClick = {
                             // Open order bottom sheet
-                        }
+                            selectedItem = item
+                            coroutineScope.launch {
+                                sheetState.show()
+                            }
+                        },
+                        cartQuantity = quantity,
+                        onIncreaseQuantity = {
+                            cartViewModel.addToCart(item, 1)
+                        },
+                        onDecreaseQuantity = {
+                            if (cartItem != null) {
+                                cartViewModel.updateQuantity(cartItem, quantity - 1)
+                            }
+                        },
                     )
                 }
             }

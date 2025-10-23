@@ -7,6 +7,9 @@ import com.example.deliveryapp.presentation.feature.auth.view.LoginScreen
 import com.example.deliveryapp.presentation.feature.auth.view.OtpScreen
 import com.example.deliveryapp.presentation.feature.auth.view.RegisterScreen
 import com.example.deliveryapp.presentation.feature.auth.view.SplashScreen
+import com.example.deliveryapp.presentation.navigation.pop
+import com.example.deliveryapp.presentation.navigation.push
+import com.example.deliveryapp.presentation.navigation.replaceAll
 import com.example.deliveryapp.routes.AuthRoutes
 import com.example.deliveryapp.routes.HomeRoutes
 
@@ -15,14 +18,10 @@ fun NavGraphBuilder.authNavGraph(navController: NavController){
         //Splash Screen
         SplashScreen(
             onNavigateToHome = {
-                navController.navigate(HomeRoutes.DashboardRoute) {
-                    popUpTo(AuthRoutes.SplashRoute) { inclusive = true }
-                }
+                navController.replaceAll(HomeRoutes.DashboardRoute)
             },
             onNavigateToLogin = {
-                navController.navigate(AuthRoutes.LoginRoute) {
-                    popUpTo(AuthRoutes.SplashRoute) { inclusive = true }
-                }
+                navController.replaceAll(AuthRoutes.LoginRoute)
             }
         )
     }
@@ -31,15 +30,13 @@ fun NavGraphBuilder.authNavGraph(navController: NavController){
         //Login Screen
         LoginScreen(
             onNavigateToRegister = {
-                navController.navigate(AuthRoutes.RegisterRoute)
+                navController.push(AuthRoutes.RegisterRoute)
             },
             onNavigateToHome = {
-                navController.navigate(HomeRoutes.DashboardRoute) {
-                    popUpTo(AuthRoutes.SplashRoute) { inclusive = true }
-                }
+                navController.replaceAll(HomeRoutes.DashboardRoute)
             },
             onNavigateToOtp = {
-                navController.navigate(AuthRoutes.OtpRoute)
+                navController.push(AuthRoutes.OtpRoute)
             }
         )
     }
@@ -47,21 +44,17 @@ fun NavGraphBuilder.authNavGraph(navController: NavController){
     composable<AuthRoutes.RegisterRoute> {
         RegisterScreen(
             onNavigateToHome = {
-                navController.navigate(HomeRoutes.DashboardRoute) {
-                    popUpTo(AuthRoutes.SplashRoute) { inclusive = true }
-                }
+                navController.replaceAll(HomeRoutes.DashboardRoute)
             },
             onNavigateToLogin = {
-                navController.popBackStack()
+                navController.pop()
             }
         )
     }
 
     composable<AuthRoutes.OtpRoute> {
         OtpScreen(onContinueClick = {
-            navController.navigate(HomeRoutes.DashboardRoute) {
-                popUpTo(AuthRoutes.OtpRoute) { inclusive = true }
-            }
+            navController.replaceAll(HomeRoutes.DashboardRoute)
         })
     }
 }

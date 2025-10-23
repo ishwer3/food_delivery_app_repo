@@ -5,6 +5,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import com.example.deliveryapp.graph.authNavGraph
 import com.example.deliveryapp.graph.homeNavGraph
+import com.example.deliveryapp.presentation.navigation.CommonNavHost
 import com.example.deliveryapp.routes.AuthRoutes
 import com.example.deliveryapp.routes.HomeRoutes
 
@@ -12,7 +13,7 @@ import com.example.deliveryapp.routes.HomeRoutes
 fun RootNavGraph(
     navController: NavHostController,
 ) {
-    NavHost(
+    CommonNavHost(
         navController = navController,
         startDestination = AuthRoutes.SplashRoute
     ) {

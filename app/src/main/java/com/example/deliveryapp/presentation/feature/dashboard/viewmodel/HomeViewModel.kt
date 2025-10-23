@@ -40,7 +40,7 @@ class HomeViewModel @Inject constructor(
 
     private fun loadPopularItems() {
         viewModelScope.launch {
-            _state.value = _state.value.copy(isLoading = true, error = null)
+            _state.value = _state.value.copy(isLoading = true, error = null, selectedCategory = null)
 
             try {
                 // Fetch multiple random meals to populate the popular items
@@ -73,14 +73,16 @@ class HomeViewModel @Inject constructor(
                 _state.value = _state.value.copy(
                     isLoading = false,
                     popularItems = finalMeals,
-                    error = null
+                    error = null,
+                    selectedCategory = null
                 )
             } catch (e: Exception) {
                 // Fallback to static data on any error
                 _state.value = _state.value.copy(
                     isLoading = false,
                     popularItems = PopularItem.getPopularItems(),
-                    error = "Failed to load meals from API. Showing local data."
+                    error = "Failed to load meals from API. Showing local data.",
+                    selectedCategory = null
                 )
             }
         }
@@ -123,7 +125,7 @@ class HomeViewModel @Inject constructor(
 
     private fun filterByCategory(category: String) {
         viewModelScope.launch {
-            _state.value = _state.value.copy(isLoading = true, error = null)
+            _state.value = _state.value.copy(isLoading = true, error = null, selectedCategory = category)
             val apiCategory = CategoryMapper.mapUIToAPICategory(category)
 
             mealRepository.getMealsByCategory(apiCategory).fold(
@@ -131,13 +133,15 @@ class HomeViewModel @Inject constructor(
                     _state.value = _state.value.copy(
                         isLoading = false,
                         popularItems = meals,
-                        error = null
+                        error = null,
+                        selectedCategory = category
                     )
                 },
                 onFailure = { throwable ->
                     _state.value = _state.value.copy(
                         isLoading = false,
-                        error = "Failed to filter meals: ${throwable.message}"
+                        error = "Failed to filter meals: ${throwable.message}",
+                        selectedCategory = category
                     )
                 }
             )

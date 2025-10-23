@@ -19,7 +19,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -37,6 +36,7 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -64,6 +64,7 @@ import com.example.deliveryapp.presentation.common.component.SearchBarField
 import com.example.deliveryapp.presentation.common.component.TopCurvedView
 import com.example.deliveryapp.presentation.feature.dashboard.intent.HomeIntent
 import com.example.deliveryapp.presentation.feature.dashboard.viewmodel.HomeViewModel
+import com.example.deliveryapp.presentation.feature.dashboard.viewmodel.CategoryViewModel
 import com.example.deliveryapp.presentation.state.CartViewModel
 import com.example.deliveryapp.ui.theme.blackStyle
 import kotlinx.coroutines.launch
@@ -72,13 +73,12 @@ import kotlinx.coroutines.launch
 @Composable
 fun HomeScreen(
     cartViewModel: CartViewModel,
+    categoryViewModel: CategoryViewModel,
+    homeViewModel: HomeViewModel,
     onFoodItemClick: (PopularItem) -> Unit = {},
     onCategoryClick: (String) -> Unit = {},
     onSearchClick: () -> Unit = {},
-    onSeeAllClick: () -> Unit = {},
-    homeViewModel: HomeViewModel = hiltViewModel(),
-    selectedCategory: String? = null,
-    onCategoryHandled: () -> Unit = {}
+    onSeeAllClick: () -> Unit = {}
 ) {
     val sheetState = rememberModalBottomSheetState()  // Allow full expansion
     val coroutineScope = rememberCoroutineScope()
@@ -89,6 +89,9 @@ fun HomeScreen(
     // Collect state from HomeViewModel
     val homeState by homeViewModel.state.collectAsState()
 
+    // Collect selected category from CategoryViewModel
+    val selectedCategory by categoryViewModel.selectedCategory.collectAsState()
+
     // Collect cart items to show quantity in cards
     val cartItems by cartViewModel.cartItems.collectAsState()
 
@@ -97,16 +100,6 @@ fun HomeScreen(
         Log.d(TAG, "HomeScreen: Cart items changed. Count: ${cartItems.size}")
         cartItems.forEach { cartItem ->
             Log.d(TAG, "HomeScreen: Cart item - ID: ${cartItem.popularItem.id}, Title: ${cartItem.popularItem.title}, Quantity: ${cartItem.quantity}")
-        }
-    }
-
-    // Listen for selected category from navigation
-    LaunchedEffect(selectedCategory) {
-        Log.d(TAG, "HomeScreen: Selected Category -> $selectedCategory")
-        if (selectedCategory != null && selectedCategory.isNotEmpty()) {
-            homeViewModel.handleIntent(HomeIntent.FilterByCategory(selectedCategory))
-            // Clear the category after handling
-            onCategoryHandled()
         }
     }
 
@@ -208,13 +201,33 @@ fun HomeScreen(
                     )
                 }
 
+                // Reorder categories to show selected first
+                val categories = getSampleCategories()
+                val reorderedCategories = selectedCategory?.let { selected ->
+                    val selectedItem = categories.find { it.categoryType == selected }
+                    if (selectedItem != null) {
+                        listOf(selectedItem) + categories.filter { it.categoryType != selected }
+                    } else {
+                        categories
+                    }
+                } ?: categories
+
                 LazyRow(
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
-                    items(getSampleCategories()) { item ->
-                        CategoryItem(item) { categoryItem ->
-                            // Filter meals by category when category is clicked
-                            homeViewModel.handleIntent(HomeIntent.FilterByCategory(categoryItem.title))
+                    items(reorderedCategories) { item ->
+                        CategoryItem(
+                            item = item,
+                            isSelected = item.categoryType == selectedCategory
+                        ) { categoryItem ->
+                            // Toggle selection: if already selected, deselect it; otherwise select it
+                            if (selectedCategory == categoryItem.categoryType) {
+                                categoryViewModel.selectCategory(null)
+                                homeViewModel.handleIntent(HomeIntent.LoadPopularItems)
+                            } else {
+                                categoryViewModel.selectCategory(categoryItem.categoryType)
+                                homeViewModel.handleIntent(HomeIntent.FilterByCategory(categoryItem.title))
+                            }
                         }
                     }
                 }
@@ -375,16 +388,20 @@ fun HomeScreen(
 }
 
 @Composable
-fun CategoryItem(item: CategoryModel, onItemClick: (item: CategoryModel) -> Unit) {
+fun CategoryItem(
+    item: CategoryModel,
+    isSelected: Boolean = false,
+    onItemClick: (item: CategoryModel) -> Unit
+) {
     Card(
         modifier = Modifier
             .size(100.dp)
             .clickable { onItemClick(item) },
         shape = RoundedCornerShape(10.dp),
         colors = CardDefaults.cardColors(
-            containerColor = Color(0xFFF1D431)
+            containerColor = if (isSelected) Color(0xFFFF9800) else Color(0xFFF1D431)
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = if (isSelected) 6.dp else 2.dp)
     ) {
         Column(
             modifier = Modifier
@@ -403,7 +420,7 @@ fun CategoryItem(item: CategoryModel, onItemClick: (item: CategoryModel) -> Unit
             Text(
                 text = item.title,
                 style = MaterialTheme.typography.bodySmall,
-                fontWeight = FontWeight.Bold,
+                fontWeight = if (isSelected) FontWeight.ExtraBold else FontWeight.Bold,
                 color = Color.White,
                 maxLines = 1
             )
@@ -416,10 +433,10 @@ fun PopularItemCard(
     item: PopularItem,
     onItemClick: () -> Unit,
     onOrderNowClick: () -> Unit,
+    modifier: Modifier = Modifier,
     cartQuantity: Int = 0,
     onIncreaseQuantity: () -> Unit = {},
-    onDecreaseQuantity: () -> Unit = {},
-    modifier: Modifier = Modifier
+    onDecreaseQuantity: () -> Unit = {}
 ) {
     Card(
         modifier = modifier

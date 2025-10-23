@@ -9,5 +9,6 @@ data class HomeState(
     val allItems: List<PopularItem> = emptyList(), // Store all items before filtering
     val selectedFilter: FilterType = FilterType.All,
     val error: String? = null,
-    val isRefreshing: Boolean = false
+    val isRefreshing: Boolean = false,
+    val selectedCategory: String? = null
 )

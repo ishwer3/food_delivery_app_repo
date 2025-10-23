@@ -1,6 +1,7 @@
 package com.example.deliveryapp.graph
 
 import androidx.compose.runtime.collectAsState
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
@@ -11,36 +12,32 @@ import com.example.deliveryapp.presentation.feature.dashboard.view.DashboardScre
 import com.example.deliveryapp.presentation.feature.dashboard.view.FoodDetailsScreen
 import com.example.deliveryapp.presentation.feature.dashboard.view.PaymentCardScreen
 import com.example.deliveryapp.presentation.feature.dashboard.view.settings.MapScreen
+import com.example.deliveryapp.presentation.feature.dashboard.viewmodel.CategoryViewModel
 import com.example.deliveryapp.presentation.feature.delivery.view.DeliveryTrackingScreen
+import com.example.deliveryapp.presentation.navigation.pop
+import com.example.deliveryapp.presentation.navigation.push
+import com.example.deliveryapp.presentation.navigation.replaceAll
 import com.example.deliveryapp.routes.AuthRoutes
 import com.example.deliveryapp.routes.HomeRoutes
 
 fun NavGraphBuilder.homeNavGraph(navController: NavController){
     composable<HomeRoutes.DashboardRoute> { backStackEntry ->
-        // Get selected category from savedStateHandle
-        val selectedCategory = backStackEntry.savedStateHandle
-            .getStateFlow<String?>("selected_category", null)
-            .collectAsState().value
-
+        val categoryViewModel: CategoryViewModel = hiltViewModel(backStackEntry)
+        val homeViewModel: com.example.deliveryapp.presentation.feature.dashboard.viewmodel.HomeViewModel = hiltViewModel(backStackEntry)
         DashboardScreen(
-            selectedCategory = selectedCategory,
-            onCategoryHandled = {
-                // Clear the saved state after handling
-                backStackEntry.savedStateHandle.set("selected_category", null as String?)
-            },
+            categoryViewModel = categoryViewModel,
+            homeViewModel = homeViewModel,
             onNavigateToAuth = {
-                navController.navigate(AuthRoutes.SplashRoute) {
-                    popUpTo(0) { inclusive = true }
-                }
+                navController.replaceAll(AuthRoutes.SplashRoute)
             },
             onBuyNowClick = {
-                navController.navigate(HomeRoutes.PaymentRoute)
+                navController.push(HomeRoutes.PaymentRoute)
             },
             onNavigateToCategory = {
-                navController.navigate(HomeRoutes.SeeAllCategoriesRoute)
+                navController.push(HomeRoutes.SeeAllCategoriesRoute)
             },
             onNavigateToFoodDetails = { foodId ->
-                navController.navigate(HomeRoutes.FoodDetailRoute(foodId))
+                navController.push(HomeRoutes.FoodDetailRoute(foodId))
             }
         )
     }
@@ -49,30 +46,26 @@ fun NavGraphBuilder.homeNavGraph(navController: NavController){
         MapScreen()
     }
 
-    composable<HomeRoutes.SeeAllCategoriesRoute> {
+    composable<HomeRoutes.SeeAllCategoriesRoute> { backStackEntry ->
+        val parentEntry = navController.getBackStackEntry<HomeRoutes.DashboardRoute>()
+        val categoryViewModel: CategoryViewModel = hiltViewModel(parentEntry)
+        val homeViewModel: com.example.deliveryapp.presentation.feature.dashboard.viewmodel.HomeViewModel = hiltViewModel(parentEntry)
         CategoryScreen(
-            onCategoryClick = { categoryTitle ->
-                // Navigate back to home with the selected category
-                navController.previousBackStackEntry
-                    ?.savedStateHandle
-                    ?.set("selected_category", categoryTitle)
-                navController.popBackStack()
-            }
+            categoryViewModel = categoryViewModel,
+            homeViewModel = homeViewModel
         )
     }
 
     composable<HomeRoutes.PaymentRoute> {
         PaymentCardScreen(onPaymentSuccess = {
-            navController.navigate(HomeRoutes.DeliveryTrackingRoute)
+            navController.push(HomeRoutes.DeliveryTrackingRoute)
         })
     }
 
     composable<HomeRoutes.DeliveryTrackingRoute> {
         DeliveryTrackingScreen(
             onBackClick = {
-                navController.navigate(HomeRoutes.DashboardRoute) {
-                    popUpTo(HomeRoutes.DashboardRoute) { inclusive = false }
-                }
+                navController.replaceAll(HomeRoutes.DashboardRoute)
             },
             onCallDriver = { phoneNumber ->
                 // Handle call driver functionality
@@ -88,7 +81,7 @@ fun NavGraphBuilder.homeNavGraph(navController: NavController){
         FoodDetailsScreen(
             foodId = foodId,
             onBackClick = {
-                navController.popBackStack()
+                navController.pop()
             }
         )
     }

@@ -23,14 +23,15 @@ import com.example.deliveryapp.presentation.feature.dashboard.navigation.bottomN
 import com.example.deliveryapp.presentation.feature.dashboard.view.cart.view.CartScreen
 import com.example.deliveryapp.presentation.feature.dashboard.view.settings.MapScreen
 import com.example.deliveryapp.presentation.feature.dashboard.view.settings.SettingsScreen
+import com.example.deliveryapp.presentation.feature.dashboard.viewmodel.CategoryViewModel
 import com.example.deliveryapp.presentation.state.CartViewModel
 import com.example.deliveryapp.routes.HomeRoutes
 
 @Composable
 fun DashboardScreen(
+    categoryViewModel: CategoryViewModel,
+    homeViewModel: com.example.deliveryapp.presentation.feature.dashboard.viewmodel.HomeViewModel,
     navController: NavHostController = rememberNavController(),
-    selectedCategory: String? = null,
-    onCategoryHandled: () -> Unit = {},
     onNavigateToAuth: () -> Unit = {},
     onNavigateToCategory: () -> Unit = {},
     onBuyNowClick: () -> Unit = {},
@@ -159,15 +160,15 @@ fun DashboardScreen(
                 startDestination = bottomNavItems[0].route,
                 modifier = Modifier.fillMaxSize()
             ) {
-                composable("home") { backStackEntry ->
+                composable("home") {
                     HomeScreen(
                         cartViewModel = cartViewModel,
+                        categoryViewModel = categoryViewModel,
+                        homeViewModel = homeViewModel,
                         onSeeAllClick = onNavigateToCategory,
                         onFoodItemClick = { item ->
                             onNavigateToFoodDetails(item.id)
-                        },
-                        selectedCategory = selectedCategory,
-                        onCategoryHandled = onCategoryHandled
+                        }
                     )
                 }
                 composable("search") {
